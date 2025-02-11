@@ -1,13 +1,66 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
+import { SignInButton, SignUpButton, UserButton, useAuth, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Home() {
   const { userId } = useAuth();
+  const { user } = useUser();
   const isAuth = !!userId;
   const router = useRouter();
+
+  useEffect(() => {
+    const syncUserData = async () => {
+      if (!userId || !user) return;
+
+      try {
+        // 🔹 Check if user exists
+        const { data: existingUser, error: fetchError } = await supabase
+          .from("users")
+          .select("user_id")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        if (fetchError) {
+          console.error("Error fetching user:", fetchError);
+          return;
+        }
+
+        if (!existingUser) {
+          // 🔹 Insert new user (handling unique constraint)
+          const { error: insertError } = await supabase.from("users").insert([
+            {
+              user_id: userId,
+              name: user.fullName || user.username || "Anonymous",
+            },
+          ]);
+
+          if (insertError) {
+            console.error("Error inserting user data:", insertError.message);
+          }
+        } else {
+          // 🔹 Update existing user
+          const { error: updateError } = await supabase
+            .from("users")
+            .update({ name: user.fullName || user.username || "Anonymous" })
+            .eq("user_id", userId);
+
+          if (updateError) {
+            console.error("Error updating user data:", updateError.message);
+          }
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      }
+    };
+
+    if (isAuth) {
+      syncUserData();
+    }
+  }, [isAuth, userId, user]);
 
   return (
     <div className="w-screen min-h-screen bg-gradient-to-r from-green-100 to-blue-100 flex items-center justify-center">
