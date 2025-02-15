@@ -63,59 +63,79 @@ export default function Home() {
   }, [isAuth, userId, user]);
 
   return (
-    <div className="w-screen min-h-screen bg-gradient-to-r from-green-100 to-blue-100 flex items-center justify-center">
-      <div className="max-w-2xl p-8 bg-white rounded-lg shadow-lg">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-4xl font-bold text-gray-800">Habit Tracker</h1>
+    <div className="w-screen min-h-screen bg-gradient-to-r from-emerald-100 via-teal-50 to-cyan-100 flex items-center justify-center p-4">
+      <div className="max-w-4xl p-8 bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">
+            Habit Tracker
+          </h1>
           <UserButton afterSignOutUrl="/" />
         </div>
 
-        <p className="text-lg text-gray-600 mb-4">
-          Welcome to Habit Tracker! Our app helps you build and maintain positive habits. Track your progress, set goals, and achieve more with personalized insights.
+        <p className="text-xl text-gray-700 mb-8 leading-relaxed">
+          Welcome to Habit Tracker! Transform your daily routines into lasting positive changes. 
+          Our intuitive platform helps you build and maintain meaningful habits while providing 
+          insightful analytics to track your journey.
         </p>
 
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-12">
           {!isAuth ? (
             <>
               <SignInButton mode="modal">
-                <Button className="mr-3">Sign In</Button>
+                <Button className="mr-4 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white px-8 py-6 text-lg">
+                  Sign In
+                </Button>
               </SignInButton>
               <SignUpButton mode="modal">
-                <Button>Sign Up</Button>
+                <Button className="bg-white text-emerald-600 border-2 border-emerald-500 hover:bg-emerald-50 px-8 py-6 text-lg">
+                  Sign Up
+                </Button>
               </SignUpButton>
             </>
           ) : (
-            <Button size="lg" onClick={() => router.push("/MainPage")}>Go to Dashboard</Button>
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white px-12 py-6 text-lg"
+              onClick={() => router.push("/MainPage")}
+            >
+              Go to Dashboard
+            </Button>
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 bg-gray-100 rounded-lg">
-            <h2 className="text-xl font-semibold text-gray-700">Track Your Habits</h2>
-            <p className="text-gray-600">
-              Easily log your daily habits and monitor your progress over time.
-            </p>
-          </div>
-          <div className="p-4 bg-gray-100 rounded-lg">
-            <h2 className="text-xl font-semibold text-gray-700">Set Goals</h2>
-            <p className="text-gray-600">
-              Define your goals and stay motivated with reminders and insights.
-            </p>
-          </div>
-          <div className="p-4 bg-gray-100 rounded-lg">
-            <h2 className="text-xl font-semibold text-gray-700">Analyze Progress</h2>
-            <p className="text-gray-600">
-              Get detailed reports and analytics to understand your habits better.
-            </p>
-          </div>
-          <div className="p-4 bg-gray-100 rounded-lg">
-            <h2 className="text-xl font-semibold text-gray-700">Community Support</h2>
-            <p className="text-gray-600">
-              Join a community of like-minded individuals and share your journey.
-            </p>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FeatureCard 
+            title="Track Your Habits"
+            description="Easily log your daily habits and monitor your progress over time with our intuitive tracking system."
+            icon="📊"
+          />
+          <FeatureCard 
+            title="Set Goals"
+            description="Define your goals and stay motivated with smart reminders and personalized insights."
+            icon="🎯"
+          />
+          <FeatureCard 
+            title="Analyze Progress"
+            description="Get detailed reports and analytics to understand your habits better and optimize your routine."
+            icon="📈"
+          />
+          <FeatureCard 
+            title="Community Support"
+            description="Join a community of like-minded individuals and share your journey to success."
+            icon="🤝"
+          />
         </div>
       </div>
     </div>
   );
 }
+
+const FeatureCard = ({ title, description, icon }: { title: string; description: string; icon: string }) => (
+  <div className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100">
+    <div className="text-4xl mb-4">{icon}</div>
+    <h2 className="text-2xl font-semibold text-gray-800 mb-3">{title}</h2>
+    <p className="text-gray-600 leading-relaxed">
+      {description}
+    </p>
+  </div>
+);
