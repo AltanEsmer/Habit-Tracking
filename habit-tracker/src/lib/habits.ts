@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient';
 import { Habit, HabitCompletion } from '@/types/database';
+import { awardXP, XP_REWARDS } from './xp';
 
 export async function createHabit(habit: Omit<Habit, 'id' | 'created_at'>) {
   const { data, error } = await supabase
@@ -50,24 +51,33 @@ export async function toggleHabitCompletion(
   date: Date,
   completed: boolean
 ) {
-  if (completed) {
-    // Add completion
-    const { error } = await supabase
-      .from('habit_completions')
-      .insert({
-        habit_id: habitId,
-        user_id: userId,
-        completed_at: date.toISOString(),
-      });
-    if (error) throw error;
-  } else {
-    // Remove completion
-    const { error } = await supabase
-      .from('habit_completions')
-      .delete()
-      .eq('habit_id', habitId)
-      .eq('user_id', userId)
-      .eq('completed_at', date.toISOString());
-    if (error) throw error;
+  try {
+    if (completed) {
+      console.log('Adding completion for user:', userId);
+      const { error } = await supabase
+        .from('habit_completions')
+        .insert({
+          habit_id: habitId,
+          user_id: userId,
+          completed_at: date.toISOString(),
+        });
+      if (error) throw error;
+
+      console.log('Awarding XP...');
+      await awardXP(userId, XP_REWARDS.HABIT_COMPLETION);
+      console.log('XP awarded successfully');
+    } else {
+      // Remove completion
+      const { error } = await supabase
+        .from('habit_completions')
+        .delete()
+        .eq('habit_id', habitId)
+        .eq('user_id', userId)
+        .eq('completed_at', date.toISOString());
+      if (error) throw error;
+    }
+  } catch (error) {
+    console.error('Error toggling habit:', error);
+    throw error;
   }
 } 

@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { useUser } from "@clerk/nextjs"
 import { Habit, HabitCompletion } from "@/types/database"
 import { getHabits, getHabitCompletions, toggleHabitCompletion } from "@/lib/habits"
+import { getCurrentXP } from "@/lib/xp"
 import { startOfMonth, endOfMonth, format } from "date-fns"
 import { Loader2 } from "lucide-react"
 import { AddHabitDialog } from "@/components/add-habit-dialog"
@@ -22,11 +23,13 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true)
   const { user } = useUser()
   const router = useRouter()
+  const [userStats, setUserStats] = useState<{ xp: number; level: number } | null>(null)
 
   useEffect(() => {
     if (user?.id) {
       loadHabits();
       loadCompletions();
+      loadUserStats();
     }
   }, [user, date]);
 
@@ -49,6 +52,15 @@ export default function CalendarPage() {
     } catch (error) {
       console.error('Error loading completions:', error);
       setLoading(false);
+    }
+  }
+
+  async function loadUserStats() {
+    try {
+      const data = await getCurrentXP(user!.id);
+      setUserStats(data);
+    } catch (error) {
+      console.error('Error loading user stats:', error);
     }
   }
 
@@ -187,6 +199,19 @@ export default function CalendarPage() {
             </div>
           </Card>
         </div>
+
+        {userStats && (
+          <div className="mb-4 flex gap-4">
+            <Card className="p-4">
+              <h3 className="text-sm font-medium">Level</h3>
+              <p className="text-2xl font-bold">{userStats.level}</p>
+            </Card>
+            <Card className="p-4">
+              <h3 className="text-sm font-medium">XP</h3>
+              <p className="text-2xl font-bold">{userStats.xp}</p>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );

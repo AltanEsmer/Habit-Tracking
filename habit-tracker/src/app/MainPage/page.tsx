@@ -22,7 +22,7 @@ export default function MainPage() {
           <div className="space-y-2">
             <SidebarItem icon={<Home />} text="Dashboard" active href="/MainPage" />
             <SidebarItem icon={<Calendar />} text="Calendar" href="/CalendarPage" />
-            <SidebarItem icon={<TrendingUp />} text="Progress" href="/progress" />
+            <SidebarItem icon={<TrendingUp />} text="Progress" href="/ProgressPage" />
             <SidebarItem icon={<Trophy />} text="Achievements" href="/achievements" />
             <SidebarItem icon={<Settings />} text="Settings" href="/settings" />
           </div>

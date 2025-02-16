@@ -20,3 +20,26 @@ export type HabitCompletion = {
     color: string;
   };
 } 
+
+export type StreakStats = {
+  currentStreak: number;
+  longestStreak: number;
+  lastCompletedDate: string | null;
+}
+
+export type MilestoneType = {
+  id: number;
+  days: number;
+  name: string;
+  icon: string;
+  achieved: boolean;
+}
+
+export type User = {
+  id: number;
+  name: string;
+  user_id: string;
+  xp: number;
+  level: number;
+  // other fields...
+};
