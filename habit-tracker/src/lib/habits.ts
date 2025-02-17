@@ -1,6 +1,8 @@
 import { supabase } from './supabaseClient';
 import { Habit, HabitCompletion } from '@/types/database';
 import { awardXP, XP_REWARDS } from './xp';
+import { checkAndUpdateAchievements } from './achievements';
+import { format } from 'date-fns';
 
 export async function createHabit(habit: Omit<Habit, 'id' | 'created_at'>) {
   const { data, error } = await supabase
@@ -52,32 +54,67 @@ export async function toggleHabitCompletion(
   completed: boolean
 ) {
   try {
-    if (completed) {
-      console.log('Adding completion for user:', userId);
-      const { error } = await supabase
+    // If not completed, we want to complete it
+    if (!completed) {
+      const { data, error: insertError } = await supabase
         .from('habit_completions')
         .insert({
           habit_id: habitId,
           user_id: userId,
-          completed_at: date.toISOString(),
-        });
-      if (error) throw error;
+          completed_at: format(date, 'yyyy-MM-dd')
+        })
+        .select();
 
-      console.log('Awarding XP...');
-      await awardXP(userId, XP_REWARDS.HABIT_COMPLETION);
-      console.log('XP awarded successfully');
+      if (insertError) {
+        console.error('Insert Error:', insertError);
+        throw new Error(insertError.message);
+      }
+
+      // Add XP when completing
+      const { error: xpError } = await supabase
+        .from('user_stats')
+        .upsert({
+          user_id: userId,
+          xp: supabase.rpc('increment', { value: 10 }),
+          level: 1
+        });
+
+      if (xpError) {
+        console.error('XP Error:', xpError);
+        throw new Error(xpError.message);
+      }
     } else {
-      // Remove completion
-      const { error } = await supabase
+      const { error: deleteError } = await supabase
         .from('habit_completions')
         .delete()
-        .eq('habit_id', habitId)
-        .eq('user_id', userId)
-        .eq('completed_at', date.toISOString());
-      if (error) throw error;
+        .match({
+          habit_id: habitId,
+          user_id: userId,
+          completed_at: format(date, 'yyyy-MM-dd')
+        });
+
+      if (deleteError) {
+        console.error('Delete Error:', deleteError);
+        throw new Error(deleteError.message);
+      }
+
+      // Remove XP when uncompleting
+      const { error: xpError } = await supabase
+        .from('users')
+        .update({ 
+          xp: supabase.rpc('increment', { column: 'xp', value: -10 })
+        })
+        .eq('user_id', userId);
+
+      if (xpError) {
+        console.error('XP Error:', xpError);
+        throw new Error(xpError.message);
+      }
     }
+
+    return true;
   } catch (error) {
-    console.error('Error toggling habit:', error);
+    console.error('Error in toggleHabitCompletion:', error);
     throw error;
   }
 } 

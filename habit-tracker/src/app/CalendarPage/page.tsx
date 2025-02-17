@@ -15,6 +15,7 @@ import { startOfMonth, endOfMonth, format } from "date-fns"
 import { Loader2 } from "lucide-react"
 import { AddHabitDialog } from "@/components/add-habit-dialog"
 import { useRouter } from "next/navigation"
+import { useToast } from "@/hooks/use-toast"
 
 export default function CalendarPage() {
   const [date, setDate] = useState<Date>(new Date())
@@ -24,6 +25,7 @@ export default function CalendarPage() {
   const { user } = useUser()
   const router = useRouter()
   const [userStats, setUserStats] = useState<{ xp: number; level: number } | null>(null)
+  const { toast } = useToast()
 
   useEffect(() => {
     if (user?.id) {
@@ -67,9 +69,21 @@ export default function CalendarPage() {
   async function handleToggleHabit(habitId: string, date: Date, completed: boolean) {
     try {
       await toggleHabitCompletion(habitId, user!.id, date, !completed);
-      loadCompletions();
-    } catch (error) {
+      await loadCompletions();
+      await loadUserStats();
+      
+      toast({
+        title: !completed ? "Habit Completed!" : "Habit Uncompleted",
+        description: !completed ? "+10 XP" : "-10 XP",
+        variant: !completed ? "default" : "destructive",
+      });
+    } catch (error: any) {
       console.error('Error toggling habit:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update habit. Please try again.",
+        variant: "destructive"
+      });
     }
   }
 
@@ -201,14 +215,29 @@ export default function CalendarPage() {
         </div>
 
         {userStats && (
-          <div className="mb-4 flex gap-4">
-            <Card className="p-4">
-              <h3 className="text-sm font-medium">Level</h3>
-              <p className="text-2xl font-bold">{userStats.level}</p>
+          <div className="grid grid-cols-2 gap-4 mb-8">
+            <Card className="p-6 bg-gradient-to-br from-purple-500 to-indigo-600 text-white">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-white/10 rounded-full">
+                  <Trophy className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white/60">Level</p>
+                  <h3 className="text-3xl font-bold">{userStats.level}</h3>
+                </div>
+              </div>
             </Card>
-            <Card className="p-4">
-              <h3 className="text-sm font-medium">XP</h3>
-              <p className="text-2xl font-bold">{userStats.xp}</p>
+            
+            <Card className="p-6 bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-white/10 rounded-full">
+                  <TrendingUp className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white/60">Experience</p>
+                  <h3 className="text-3xl font-bold">{userStats.xp} XP</h3>
+                </div>
+              </div>
             </Card>
           </div>
         )}

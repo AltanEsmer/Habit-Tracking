@@ -135,16 +135,16 @@ export default function ProgressPage() {
     : 100;
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg">
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar with full height */}
+      <div className="w-64 bg-white shadow-lg fixed h-full">
         <div className="p-4 border-b">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">
             Habit Tracker
           </h1>
         </div>
         
-        <nav className="p-4">
+        <nav className="p-4 flex flex-col h-[calc(100%-140px)]"> {/* Adjust height to account for header and footer */}
           <div className="space-y-2">
             <SidebarItem icon={<Home />} text="Dashboard" href="/MainPage" />
             <SidebarItem icon={<CalendarIcon />} text="Calendar" href="/CalendarPage" />
@@ -174,89 +174,105 @@ export default function ProgressPage() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 p-8">
-        <h1 className="text-4xl font-bold text-gray-800 mb-8">Progress</h1>
+      {/* Main Content with margin for sidebar */}
+      <div className="ml-64 flex-1 p-8">
+        <h1 className="text-4xl font-bold text-gray-800 mb-8">Progress Overview</h1>
         
-        <div className="container mx-auto p-6">
-          <h1 className="text-3xl font-bold mb-6">Your Progress</h1>
-          
-          <div className="grid gap-6 md:grid-cols-2 mb-6">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Level {xpData?.level}</h2>
+        <div className="grid gap-6 md:grid-cols-3 mb-8">
+          {/* Level Card */}
+          <Card className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Trophy className="h-5 w-5" />
+                Level {xpData?.level}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <p className="text-3xl font-bold">{xpData?.xp} XP</p>
-            </Card>
-            
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Current Streak</h2>
-              <p className="text-3xl font-bold">{stats?.currentStreak || 0} days</p>
-            </Card>
-          </div>
-
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Progress Over Time</h2>
-            <ProgressGraph data={dummyData} />
+              <p className="text-sm text-white/80">Keep going!</p>
+            </CardContent>
           </Card>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Longest Streak</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <motion.div 
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: 1 }}
-                  className="flex items-center gap-2"
-                >
-                  <span className="text-4xl font-bold">{stats?.longestStreak || 0}</span>
-                  <span className="text-muted-foreground">days</span>
-                </motion.div>
-              </CardContent>
-            </Card>
+          {/* Current Streak Card */}
+          <Card className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Current Streak
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">{stats?.currentStreak || 0} days</p>
+              <p className="text-sm text-white/80">Keep the momentum!</p>
+            </CardContent>
+          </Card>
 
-            <Card className="md:col-span-2">
-              <CardHeader>
-                <CardTitle>Milestone Badges</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <AnimatePresence>
-                    {milestones.map((milestone) => (
-                      <motion.div
-                        key={milestone.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className={`p-4 rounded-lg border ${
-                          milestone.achieved
-                            ? "bg-primary/10 border-primary"
-                            : "bg-muted border-muted-foreground/20"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{milestone.icon}</span>
-                          <div>
-                            <h3 className="font-semibold">{milestone.name}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              {milestone.days} days streak
-                            </p>
-                          </div>
-                        </div>
-                        <Badge
-                          variant={milestone.achieved ? "default" : "secondary"}
-                          className="mt-2"
-                        >
-                          {milestone.achieved ? "Achieved" : "In Progress"}
-                        </Badge>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Longest Streak Card */}
+          <Card className="bg-gradient-to-br from-amber-500 to-orange-600 text-white">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Trophy className="h-5 w-5" />
+                Longest Streak
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">{stats?.longestStreak || 0} days</p>
+              <p className="text-sm text-white/80">Personal best!</p>
+            </CardContent>
+          </Card>
         </div>
+
+        {/* Progress Graph */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold">Progress Over Time</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[400px]"> {/* Increased from 200px to 400px for better visibility */}
+            <ProgressGraph data={graphData.length > 0 ? graphData : dummyData} />
+          </CardContent>
+        </Card>
+
+        {/* Milestone Badges */}
+        <Card className="mb-8"> {/* Added margin-bottom */}
+          <CardHeader className="pb-3"> {/* Reduced padding */}
+            <CardTitle className="text-xl font-semibold">Milestone Badges</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <AnimatePresence>
+                {milestones.map((milestone) => (
+                  <motion.div
+                    key={milestone.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className={`p-4 rounded-lg border ${  // Reduced padding from p-6 to p-4
+                      milestone.achieved
+                        ? "bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200"
+                        : "bg-white border-gray-200"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl">{milestone.icon}</span>
+                      <div>
+                        <h3 className="font-semibold">{milestone.name}</h3>
+                        <p className="text-sm text-gray-600">
+                          {milestone.days} days streak
+                        </p>
+                      </div>
+                    </div>
+                    <Badge
+                      variant={milestone.achieved ? "outline" : "secondary"}
+                      className="mt-3"
+                    >
+                      {milestone.achieved ? "Achieved" : "In Progress"}
+                    </Badge>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

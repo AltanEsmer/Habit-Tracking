@@ -23,7 +23,7 @@ export default function MainPage() {
             <SidebarItem icon={<Home />} text="Dashboard" active href="/MainPage" />
             <SidebarItem icon={<Calendar />} text="Calendar" href="/CalendarPage" />
             <SidebarItem icon={<TrendingUp />} text="Progress" href="/ProgressPage" />
-            <SidebarItem icon={<Trophy />} text="Achievements" href="/achievements" />
+            <SidebarItem icon={<Trophy />} text="Achievements" href="/AchievementsPage" />
             <SidebarItem icon={<Settings />} text="Settings" href="/settings" />
           </div>
 
